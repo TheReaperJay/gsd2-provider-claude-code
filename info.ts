@@ -6,8 +6,8 @@
  * side effect of import — discoverLocalProviders() triggers the import.
  */
 
-import { registerProviderInfo } from "@gsd/provider-api";
-import type { GsdProviderInfo, GsdModel, GsdStreamContext, GsdProviderDeps, GsdEvent } from "@gsd/provider-api";
+import { registerProviderInfo } from "@thereaperjay/gsd-provider-api";
+import type { GsdProviderInfo, GsdModel, GsdStreamContext, GsdProviderDeps, GsdEvent } from "@thereaperjay/gsd-provider-api";
 import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 import { existsSync } from "node:fs";
@@ -379,11 +379,15 @@ const claudeCodeModels: GsdModel[] = [
 export const claudeCodeProviderInfo: GsdProviderInfo = {
   id: "claude-code",
   displayName: "Claude Code (Subscription)",
-  auth: {
-    type: "cli",
+  authMode: "externalCli",
+  onboarding: {
+    kind: "externalCli",
     hint: "requires claude CLI installed and logged in",
     check: checkClaudeCodeCli,
-    credential: { type: "api_key", key: "cli-managed" },
+  },
+  isReady: () => {
+    const result = checkClaudeCodeCli();
+    return result.ok;
   },
   defaultModel: "claude-code:claude-opus-4-6",
   models: claudeCodeModels,

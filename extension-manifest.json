@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "Access Claude models through Claude Code CLI subscription",
   "tier": "community",
-  "requires": { "platform": ">=2.39.0" },
+  "requires": { "platform": ">=2.44.0" },
   "provides": {
     "provider": {
       "id": "claude-code",
