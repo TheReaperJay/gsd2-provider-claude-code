@@ -7,37 +7,24 @@
  */
 
 import type { ExtensionAPI } from "@gsd/pi-coding-agent";
-import { wireProvidersToPI } from "@thereaperjay/gsd-provider-api";
+import { wireProvidersToPI, runPluginOnboarding } from "@thereaperjay/gsd-provider-api";
+import { claudeCodeProviderInfo } from "./info.ts";
 
-export default async function(pi: ExtensionAPI): Promise<void> {
-  // Import triggers registerProviderInfo() side effect
+// ─── Phase 1: CLI Install Hook ──────────────────────────────────────────────
+
+export default async function activate(pi: ExtensionAPI): Promise<void> {
   await import("./info.ts");
 
-  // CLI installation is verified by extension-manifest.json runtime deps.
-  // This hook checks authentication status — a separate concern.
   pi.registerAfterInstall(async (ctx) => {
-    const { spawnSync } = await import("node:child_process");
-    const result = spawnSync("claude", ["auth", "status", "--json"], {
-      encoding: "utf-8",
-      timeout: 5000,
-    });
-    if (result.error || result.status !== 0) {
-      ctx.warn("Claude CLI is not authenticated. Run 'claude auth login' before using this provider.");
+    const result = claudeCodeProviderInfo.onboarding!.check();
+    if (!result.ok) {
+      ctx.warn(result.instruction);
       return;
     }
-    try {
-      const parsed = JSON.parse(result.stdout);
-      if (parsed.loggedIn !== true) {
-        ctx.warn("Claude CLI is not authenticated. Run 'claude auth login' before using this provider.");
-        return;
-      }
-      const email = typeof parsed.email === "string" ? parsed.email : undefined;
-      ctx.log(`Claude CLI authenticated${email ? ` as ${email}` : ""}`);
-    } catch {
-      ctx.warn("Could not verify Claude CLI auth status. Run 'claude auth login' if you encounter issues.");
-    }
+    ctx.log(`Claude CLI authenticated${result.email ? ` as ${result.email}` : ""}.`);
   });
 
-  // Wire registered providers to Pi so models appear in model registry
+  // ─── Phase 2: Session Start ─────────────────────────────────────────────
   await wireProvidersToPI(pi);
+  await runPluginOnboarding(claudeCodeProviderInfo);
 }

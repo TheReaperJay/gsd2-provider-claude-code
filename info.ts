@@ -389,7 +389,6 @@ export const claudeCodeProviderInfo: GsdProviderInfo = {
     const result = checkClaudeCodeCli();
     return result.ok;
   },
-  defaultModel: "claude-code:claude-opus-4-6",
   models: claudeCodeModels,
   createStream: claudeCodeCreateStream,
 };
