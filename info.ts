@@ -61,9 +61,9 @@ function checkClaudeCodeCli(
 // ─── SDK model aliases ────────────────────────────────────────────────────────
 
 const SDK_MODEL_ALIASES: Record<string, string> = {
-  "claude-code:claude-opus-4-6": "opus",
-  "claude-code:claude-sonnet-4-6": "sonnet",
-  "claude-code:claude-haiku-4-5": "haiku",
+  "claude-code:opus-4-6": "opus",
+  "claude-code:sonnet-4-6": "sonnet",
+  "claude-code:haiku-4-5": "haiku",
 };
 
 // ─── Tool detail extraction ───────────────────────────────────────────────────
@@ -370,9 +370,9 @@ function claudeCodeCreateStream(
 // ─── Models ───────────────────────────────────────────────────────────────────
 
 const claudeCodeModels: GsdModel[] = [
-  { id: "claude-code:claude-opus-4-6", displayName: "Claude Opus 4.6 (via Claude Code)", reasoning: true, contextWindow: 200000, maxTokens: 32000 },
-  { id: "claude-code:claude-sonnet-4-6", displayName: "Claude Sonnet 4.6 (via Claude Code)", reasoning: true, contextWindow: 200000, maxTokens: 16000 },
-  { id: "claude-code:claude-haiku-4-5", displayName: "Claude Haiku 4.5 (via Claude Code)", reasoning: false, contextWindow: 200000, maxTokens: 8096 },
+  { id: "claude-code:opus-4-6", displayName: "Opus 4.6 (Claude Code)", reasoning: true, contextWindow: 1000000, maxTokens: 32000 },
+  { id: "claude-code:sonnet-4-6", displayName: "Sonnet 4.6 (Claude Code)", reasoning: true, contextWindow: 200000, maxTokens: 16000 },
+  { id: "claude-code:haiku-4-5", displayName: "Haiku 4.5 (Claude Code)", reasoning: false, contextWindow: 200000, maxTokens: 8096 },
 ];
 
 // ─── Provider info ────────────────────────────────────────────────────────────
@@ -381,6 +381,7 @@ export const claudeCodeProviderInfo: GsdProviderInfo = {
   id: "claude-code",
   pluginDir: dirname(fileURLToPath(import.meta.url)),
   displayName: "Claude Code (Subscription)",
+  api: "anthropic-messages",
   authMode: "externalCli",
   onboarding: {
     kind: "externalCli",

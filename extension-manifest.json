@@ -9,7 +9,7 @@
     "provider": {
       "id": "claude-code",
       "authType": "cli",
-      "defaultModel": "claude-code:claude-opus-4-6"
+      "defaultModel": "claude-code:opus-4-6"
     }
   },
   "dependencies": {
