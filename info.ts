@@ -381,7 +381,6 @@ export const claudeCodeProviderInfo: GsdProviderInfo = {
   id: "claude-code",
   pluginDir: dirname(fileURLToPath(import.meta.url)),
   displayName: "Claude Code (Subscription)",
-  api: "anthropic-messages",
   authMode: "externalCli",
   onboarding: {
     kind: "externalCli",
