@@ -9,8 +9,9 @@
 import { registerProviderInfo } from "@thereaperjay/gsd-provider-api";
 import type { GsdProviderInfo, GsdModel, GsdStreamContext, GsdProviderDeps, GsdEvent } from "@thereaperjay/gsd-provider-api";
 import { spawnSync } from "node:child_process";
-import { join } from "node:path";
+import { join, dirname } from "node:path";
 import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { SdkActivityWriter } from "./activity-writer.ts";
 import { createMcpServerFromRegistry } from "./mcp-tools.ts";
@@ -378,6 +379,7 @@ const claudeCodeModels: GsdModel[] = [
 
 export const claudeCodeProviderInfo: GsdProviderInfo = {
   id: "claude-code",
+  pluginDir: dirname(fileURLToPath(import.meta.url)),
   displayName: "Claude Code (Subscription)",
   authMode: "externalCli",
   onboarding: {
@@ -388,6 +390,14 @@ export const claudeCodeProviderInfo: GsdProviderInfo = {
   isReady: () => {
     const result = checkClaudeCodeCli();
     return result.ok;
+  },
+  afterInstall: (ctx) => {
+    const result = checkClaudeCodeCli();
+    if (!result.ok) {
+      ctx.warn(result.instruction);
+      return;
+    }
+    ctx.log(`Claude CLI authenticated${result.email ? ` as ${result.email}` : ""}`);
   },
   models: claudeCodeModels,
   createStream: claudeCodeCreateStream,

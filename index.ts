@@ -1,20 +1,15 @@
+/**
+ * Claude Code extension entry point.
+ *
+ * Loaded by Pi's extension system. Registers the Claude Code provider,
+ * wires lifecycle hooks and providers to Pi.
+ */
+
 import type { ExtensionAPI } from "@gsd/pi-coding-agent";
-import { wireProvidersToPI, runPluginOnboarding } from "@thereaperjay/gsd-provider-api";
-import { claudeCodeProviderInfo } from "./info.ts";
+import { wireLifecycleHooks, wireProvidersToPI } from "@thereaperjay/gsd-provider-api";
 
-export default async function activate(pi: ExtensionAPI): Promise<void> {
+export default async function(pi: ExtensionAPI): Promise<void> {
   await import("./info.ts");
-
-  pi.registerAfterInstall(async (ctx) => {
-    const result = claudeCodeProviderInfo.onboarding!.check();
-    if (!result.ok) {
-      ctx.warn(result.instruction);
-      return;
-    }
-    ctx.log(`Claude CLI authenticated${result.email ? ` as ${result.email}` : ""}.`);
-
-    await runPluginOnboarding(claudeCodeProviderInfo);
-  });
-
+  wireLifecycleHooks(pi);
   await wireProvidersToPI(pi);
 }
