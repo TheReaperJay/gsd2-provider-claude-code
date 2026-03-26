@@ -1,21 +1,22 @@
 ```
- ██████╗██╗      █████╗ ██╗   ██╗██████╗ ███████╗     ██████╗ ██████╗ ██████╗ ███████╗    ██╗  ██╗     ██████╗ ███████╗██████╗
-██╔════╝██║     ██╔══██╗██║   ██║██╔══██╗██╔════╝    ██╔════╝██╔═══██╗██╔══██╗██╔════╝    ╚██╗██╔╝    ██╔════╝ ██╔════╝██╔══██╗
-██║     ██║     ███████║██║   ██║██║  ██║█████╗      ██║     ██║   ██║██║  ██║█████╗       ╚███╔╝     ██║  ███╗███████╗██║  ██║
-██║     ██║     ██╔══██║██║   ██║██║  ██║██╔══╝      ██║     ██║   ██║██║  ██║██╔══╝       ██╔██╗     ██║   ██║╚════██║██║  ██║
-╚██████╗███████╗██║  ██║╚██████╔╝██████╔╝███████╗    ╚██████╗╚██████╔╝██████╔╝███████╗    ██╔╝ ██╗    ╚██████╔╝███████║██████╔╝
- ╚═════╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝     ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝    ╚═╝  ╚═╝     ╚═════╝ ╚══════╝╚═════╝
-
-              ██╗ █████╗ ██╗   ██╗    ████████╗██╗  ██╗███████╗    ██████╗ ███████╗ █████╗ ██████╗ ███████╗██████╗
-              ██║██╔══██╗╚██╗ ██╔╝    ╚══██╔══╝██║  ██║██╔════╝    ██╔══██╗██╔════╝██╔══██╗██╔══██╗██╔════╝██╔══██╗
-              ██║███████║ ╚████╔╝        ██║   ███████║█████╗      ██████╔╝█████╗  ███████║██████╔╝█████╗  ██████╔╝
-         ██   ██║██╔══██║  ╚██╔╝         ██║   ██╔══██║██╔══╝      ██╔══██╗██╔══╝  ██╔══██║██╔═══╝ ██╔══╝  ██╔══██╗
-         ╚█████╔╝██║  ██║   ██║          ██║   ██║  ██║███████╗    ██║  ██║███████╗██║  ██║██║     ███████╗██║  ██║
-          ╚════╝ ╚═╝  ╚═╝   ╚═╝          ╚═╝   ╚═╝  ╚═╝╚══════╝    ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝     ╚══════╝╚═╝  ╚═╝
-
-                    ┬ ┬┌─┐┌┬┐┌─┐┬ ┬  ┌─┐┬ ┬┌┬┐  ┌─┐┌─┐┬─┐  ┌┬┐┬ ┬┌─┐┌┬┐  ┌─┐┬ ┬┬┌┐┌┌─┐
-                    │││├─┤ │ │  ├─┤  │ ││ │ │   ├┤ │ │├┬┘   │ ├─┤├─┤ │   └─┐││││││││ ┬
-                    └┴┘┴ ┴ ┴ └─┘┴ ┴  └─┘└─┘ ┴   └  └─┘┴└─   ┴ ┴ ┴┴ ┴ ┴   └─┘└┴┘┴┘└┘└─┘
+ ██████╗██╗      █████╗ ██╗   ██╗██████╗ ███████╗     ██████╗ ██████╗ ██████╗ ███████╗
+██╔════╝██║     ██╔══██╗██║   ██║██╔══██╗██╔════╝    ██╔════╝██╔═══██╗██╔══██╗██╔════╝
+██║     ██║     ███████║██║   ██║██║  ██║█████╗      ██║     ██║   ██║██║  ██║█████╗
+██║     ██║     ██╔══██║██║   ██║██║  ██║██╔══╝      ██║     ██║   ██║██║  ██║██╔══╝
+╚██████╗███████╗██║  ██║╚██████╔╝██████╔╝███████╗    ╚██████╗╚██████╔╝██████╔╝███████╗
+ ╚═════╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝     ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝
+                                    ██╗  ██╗
+                                    ╚██╗██╔╝
+                                     ╚███╔╝
+                                     ██╔██╗
+                                    ██╔╝ ██╗
+                                    ╚═╝  ╚═╝
+                         ██████╗ ███████╗██████╗ ██████╗
+                        ██╔════╝ ██╔════╝██╔══██╗╚════██╗
+                        ██║  ███╗███████╗██║  ██║ █████╔╝
+                        ██║   ██║╚════██║██║  ██║██╔═══╝
+                        ╚██████╔╝███████║██████╔╝███████╗
+                         ╚═════╝ ╚══════╝╚═════╝ ╚══════╝
 ```
 
 <div align="center">
@@ -150,10 +151,23 @@ This clears the cached clone and triggers a fresh `npm install` and lifecycle ho
 
 This package is distributed via GitHub Packages, not npmjs.org. The npm public registry has a persistent problem with supply chain attacks and offers inadequate privacy controls for scoped packages. GitHub Packages ties distribution to the source repo, providing verifiable provenance.
 
-## Links
+---
 
-- GitHub: [TheReaperJay](https://github.com/TheReaperJay)
-- Discord: `realjaybrew`
-- Telegram: `realjaybrew`
-- GSD core: [gsd-build/gsd-2](https://github.com/gsd-build/gsd-2)
-- Provider API: [TheReaperJay/gsd-provider-api](https://github.com/TheReaperJay/gsd-provider-api)
+```
+                    ╦╔═╗╦ ╦  ╔╦╗╦ ╦╔═╗  ╦═╗╔═╗╔═╗╔═╗╔═╗╦═╗
+                    ║╠═╣╚╦╝   ║ ╠═╣║╣   ╠╦╝║╣ ╠═╣╠═╝║╣ ╠╦╝
+                   ╚╝╩ ╩ ╩    ╩ ╩ ╩╚═╝  ╩╚═╚═╝╩ ╩╩  ╚═╝╩╚═
+
+        ┬ ┬┌─┐┌┬┐┌─┐┬ ┬  ┌─┐┬ ┬┌┬┐  ┌─┐┌─┐┬─┐  ┌┬┐┬ ┬┌─┐┌┬┐  ┌─┐┬ ┬┬┌┐┌┌─┐
+        │││├─┤ │ │  ├─┤  │ ││ │ │   ├┤ │ │├┬┘   │ ├─┤├─┤ │   └─┐││││││││ ┬
+        └┴┘┴ ┴ ┴ └─┘┴ ┴  └─┘└─┘ ┴   └  └─┘┴└─   ┴ ┴ ┴┴ ┴ ┴   └─┘└┴┘┴┘└┘└─┘
+```
+
+<div align="center">
+
+<a href="https://github.com/TheReaperJay"><img src="https://img.shields.io/badge/GitHub-TheReaperJay-181717?style=for-the-badge&logo=github" alt="GitHub"></a>
+<a href="https://discord.gg/realjaybrew"><img src="https://img.shields.io/badge/Discord-realjaybrew-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"></a>
+<a href="https://t.me/realjaybrew"><img src="https://img.shields.io/badge/Telegram-realjaybrew-26A5E4?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram"></a>
+<a href="https://github.com/TheReaperJay/gsd2-provider-claude-code/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=for-the-badge" alt="License"></a>
+
+</div>
