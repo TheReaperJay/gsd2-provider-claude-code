@@ -6,6 +6,7 @@
  */
 
 import { getGsdTools } from "@thereaperjay/gsd-provider-api";
+import type { GsdToolDef } from "@thereaperjay/gsd-provider-api";
 
 function normalizeMcpResult(raw: unknown): { content: Array<{ type: "text"; text: string }>; isError?: boolean } {
   if (raw && typeof raw === "object") {
@@ -29,9 +30,22 @@ function normalizeMcpResult(raw: unknown): { content: Array<{ type: "text"; text
   };
 }
 
-export async function createMcpServerFromRegistry() {
+function resolveToolSet(contextTools?: readonly GsdToolDef[]): readonly GsdToolDef[] {
+  const merged = new Map<string, GsdToolDef>();
+
+  for (const tool of contextTools ?? []) {
+    merged.set(tool.name, tool);
+  }
+  for (const tool of getGsdTools()) {
+    if (!merged.has(tool.name)) merged.set(tool.name, tool);
+  }
+
+  return Array.from(merged.values());
+}
+
+export async function createMcpServerFromRegistry(contextTools?: readonly GsdToolDef[]) {
   const { createSdkMcpServer, tool } = await import("@anthropic-ai/claude-agent-sdk");
-  const gsdTools = getGsdTools();
+  const gsdTools = resolveToolSet(contextTools);
 
   if (gsdTools.length === 0) return undefined;
 

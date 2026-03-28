@@ -341,7 +341,7 @@ function claudeCodeCreateStream(
         }],
       };
 
-      const mcpServer = await createMcpServerFromRegistry();
+      const mcpServer = await createMcpServerFromRegistry(context.tools);
 
       const stopHookHandler = async (rawInput: unknown): Promise<HookResult> => {
         const input = rawInput as StopHookInput;
