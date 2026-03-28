@@ -114,6 +114,43 @@ function extractToolDetail(toolName: string, toolInput: unknown): string | undef
   }
 }
 
+function extractMessageText(content: unknown): string {
+  if (typeof content === "string") return content.trim();
+  if (!Array.isArray(content)) return "";
+
+  const parts: string[] = [];
+  for (const block of content) {
+    const item = block as Record<string, unknown> | null | undefined;
+    if (!item) continue;
+    if (item.type === "text" && typeof item.text === "string" && item.text.trim().length > 0) {
+      parts.push(item.text.trim());
+    }
+  }
+  return parts.join("\n").trim();
+}
+
+function buildPromptFromHistory(context: GsdStreamContext): string {
+  const messages = Array.isArray(context.messages) ? context.messages : [];
+  if (messages.length === 0) return context.userPrompt;
+
+  const transcript: string[] = [];
+  for (const msg of messages) {
+    if (msg.role !== "user" && msg.role !== "assistant") continue;
+    const text = extractMessageText(msg.content);
+    if (!text) continue;
+    const speaker = msg.role === "user" ? "User" : "Assistant";
+    transcript.push(`${speaker}:\n${text}`);
+  }
+
+  if (transcript.length === 0) return context.userPrompt;
+
+  return [
+    "Continue this conversation and respond to the final User message.",
+    "",
+    transcript.join("\n\n"),
+  ].join("\n");
+}
+
 // ─── Event queue ──────────────────────────────────────────────────────────────
 
 type EventQueueResolver = (value: IteratorResult<GsdEvent>) => void;
@@ -226,6 +263,21 @@ function claudeCodeCreateStream(
     }
 
     let queryObj: (AsyncIterable<unknown> & { interrupt?: () => Promise<void>; close?: () => void }) | null = null;
+    const abortController = new AbortController();
+    let detachAbortListener: (() => void) | null = null;
+
+    if (context.signal) {
+      if (context.signal.aborted) {
+        abortController.abort();
+      } else {
+        const onAbort = () => {
+          abortController.abort();
+          if (queryObj?.interrupt) void queryObj.interrupt();
+        };
+        context.signal.addEventListener("abort", onAbort, { once: true });
+        detachAbortListener = () => context.signal?.removeEventListener("abort", onAbort);
+      }
+    }
 
     try {
       const hookBridge = {
@@ -284,6 +336,7 @@ function claudeCodeCreateStream(
         model: sdkAlias,
         systemPrompt: context.systemPrompt,
         cwd: basePath,
+        abortController,
         mcpServers: mcpServer ? { "gsd-tools": mcpServer } : undefined,
         hooks: { ...hookBridge, Stop: [{ hooks: [stopHookHandler] }] },
         permissionMode: "bypassPermissions" as const,
@@ -314,8 +367,10 @@ function claudeCodeCreateStream(
         }, hardTimeoutMs);
       }
 
+      const prompt = buildPromptFromHistory(context);
+
       queryObj = query({
-        prompt: context.userPrompt,
+        prompt,
         options: queryOptions as unknown as Record<string, unknown>,
       });
 
@@ -398,6 +453,7 @@ function claudeCodeCreateStream(
     } catch (err) {
       queue.push({ type: "error", message: err instanceof Error ? err.message : String(err), category: "unknown" });
     } finally {
+      if (detachAbortListener) detachAbortListener();
       clearSupervisionTimers();
       activityWriter.flush();
       queryObj = null;
