@@ -273,10 +273,16 @@ function claudeCodeCreateStream(
 
     function safeInterrupt(): void {
       if (!queryObj?.interrupt) return;
-      void queryObj.interrupt().catch((err: unknown) => {
+      try {
+        const interruptResult = queryObj.interrupt();
+        void interruptResult.catch((err: unknown) => {
+          if (isAbortLikeError(err)) return;
+          console.warn(`[claude-code-reaper] interrupt failed: ${err instanceof Error ? err.message : String(err)}`);
+        });
+      } catch (err) {
         if (isAbortLikeError(err)) return;
         console.warn(`[claude-code-reaper] interrupt failed: ${err instanceof Error ? err.message : String(err)}`);
-      });
+      }
     }
 
     if (context.signal) {
@@ -464,7 +470,15 @@ function claudeCodeCreateStream(
         }
       }
     } catch (err) {
-      queue.push({ type: "error", message: err instanceof Error ? err.message : String(err), category: "unknown" });
+      if (isAbortLikeError(err)) {
+        queue.push({
+          type: "completion",
+          usage: { inputTokens: 0, outputTokens: 0 },
+          stopReason: "cancel",
+        });
+      } else {
+        queue.push({ type: "error", message: err instanceof Error ? err.message : String(err), category: "unknown" });
+      }
     } finally {
       if (detachAbortListener) detachAbortListener();
       clearSupervisionTimers();
