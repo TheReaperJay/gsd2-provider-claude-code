@@ -266,13 +266,26 @@ function claudeCodeCreateStream(
     const abortController = new AbortController();
     let detachAbortListener: (() => void) | null = null;
 
+    function isAbortLikeError(err: unknown): boolean {
+      const text = err instanceof Error ? `${err.name} ${err.message}` : String(err);
+      return text.toLowerCase().includes("abort");
+    }
+
+    function safeInterrupt(): void {
+      if (!queryObj?.interrupt) return;
+      void queryObj.interrupt().catch((err: unknown) => {
+        if (isAbortLikeError(err)) return;
+        console.warn(`[claude-code-reaper] interrupt failed: ${err instanceof Error ? err.message : String(err)}`);
+      });
+    }
+
     if (context.signal) {
       if (context.signal.aborted) {
         abortController.abort();
       } else {
         const onAbort = () => {
+          safeInterrupt();
           abortController.abort();
-          if (queryObj?.interrupt) void queryObj.interrupt();
         };
         context.signal.addEventListener("abort", onAbort, { once: true });
         detachAbortListener = () => context.signal?.removeEventListener("abort", onAbort);
@@ -348,14 +361,14 @@ function claudeCodeCreateStream(
       if (softTimeoutMs > 0) {
         wrapupWarningHandle = setTimeout(() => {
           wrapupWarningHandle = null;
-          if (queryObj?.interrupt) void queryObj.interrupt();
+          safeInterrupt();
         }, softTimeoutMs);
       }
 
       if (idleTimeoutMs > 0) {
         idleWatchdogHandle = setInterval(() => {
           if (Date.now() - lastActivityAt < idleTimeoutMs) return;
-          if (queryObj?.interrupt) void queryObj.interrupt();
+          safeInterrupt();
           lastActivityAt = Date.now();
         }, 15000);
       }
