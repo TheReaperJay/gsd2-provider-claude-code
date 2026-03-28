@@ -44,6 +44,21 @@ Built on [@thereaperjay/gsd-provider-api](https://github.com/TheReaperJay/gsd-pr
 - **Lifecycle hooks** — install-time CLI verification, session-start auth checks, and plugin state management all handled by the framework
 - **Zero credential handling** — no API keys, no OAuth tokens, no stored secrets. All model calls route through your locally authenticated Claude CLI via the official [Claude Agent SDK](https://www.npmjs.com/package/@anthropic-ai/claude-agent-sdk)
 
+## Project Status & Namespace
+
+The official Claude Code plugin is now integrated directly in GSD2.
+
+This repository remains active for advanced workflow features and compatibility improvements, and some of those features are planned to be merged upstream into the official GSD2 plugin over time.
+
+To avoid provider ID/model ID collisions with the official plugin, this extension now uses a separate namespace:
+
+- **Provider ID:** `claude-code-reaper`
+- **Model IDs:** `claude-code-reaper:opus-4-6`, `claude-code-reaper:sonnet-4-6`, `claude-code-reaper:haiku-4-5`
+
+If you have both plugins installed, select the `claude-code-reaper:*` models explicitly with `/model` when you want to use this extension.
+
+If you are upgrading from an older version of this plugin, update any saved model preference from `claude-code:*` to `claude-code-reaper:*`.
+
 ## Licensing and Authentication
 
 This extension uses the official [Claude Agent SDK](https://www.npmjs.com/package/@anthropic-ai/claude-agent-sdk) (`@anthropic-ai/claude-agent-sdk`) to execute model queries. It operates entirely through your locally authenticated Claude CLI session.
@@ -69,9 +84,9 @@ Your Claude subscription and its terms of service govern all model usage. This p
 
 | Model | ID | Context | Reasoning | Max Output |
 |---|---|---|---|---|
-| Opus 4.6 | `claude-code:opus-4-6` | 1,000,000 | Yes | 32,000 |
-| Sonnet 4.6 | `claude-code:sonnet-4-6` | 200,000 | Yes | 16,000 |
-| Haiku 4.5 | `claude-code:haiku-4-5` | 200,000 | No | 8,096 |
+| Opus 4.6 | `claude-code-reaper:opus-4-6` | 1,000,000 | Yes | 32,000 |
+| Sonnet 4.6 | `claude-code-reaper:sonnet-4-6` | 200,000 | Yes | 16,000 |
+| Haiku 4.5 | `claude-code-reaper:haiku-4-5` | 200,000 | No | 8,096 |
 
 Switch models with `/model` in a GSD session.
 

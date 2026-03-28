@@ -58,9 +58,34 @@ function checkClaudeCodeCli(
   return email ? { ok: true, email } : { ok: true };
 }
 
+let cachedClaudePath: string | null = null;
+
+function getClaudePath(spawnFn: typeof spawnSync = spawnSync): string {
+  if (cachedClaudePath) return cachedClaudePath;
+  try {
+    const whichResult = spawnFn("which", ["claude"], { encoding: "utf-8" });
+    if (whichResult.status === 0 && typeof whichResult.stdout === "string") {
+      const resolved = whichResult.stdout.trim();
+      if (resolved) {
+        cachedClaudePath = resolved;
+        return cachedClaudePath;
+      }
+    }
+  } catch {
+    // fall through to PATH resolution
+  }
+  cachedClaudePath = "claude";
+  return cachedClaudePath;
+}
+
 // ─── SDK model aliases ────────────────────────────────────────────────────────
 
 const SDK_MODEL_ALIASES: Record<string, string> = {
+  // New namespace
+  "claude-code-reaper:opus-4-6": "opus",
+  "claude-code-reaper:sonnet-4-6": "sonnet",
+  "claude-code-reaper:haiku-4-5": "haiku",
+  // Backward compatibility for existing saved model ids
   "claude-code:opus-4-6": "opus",
   "claude-code:sonnet-4-6": "sonnet",
   "claude-code:haiku-4-5": "haiku",
@@ -255,6 +280,7 @@ function claudeCodeCreateStream(
       };
 
       const queryOptions = {
+        pathToClaudeCodeExecutable: getClaudePath(),
         model: sdkAlias,
         systemPrompt: context.systemPrompt,
         cwd: basePath,
@@ -293,10 +319,17 @@ function claudeCodeCreateStream(
         options: queryOptions as unknown as Record<string, unknown>,
       });
 
+      let completionEmitted = false;
+      let lastTextDelta = "";
+      let lastThinkingDelta = "";
+
       for await (const msg of queryObj) {
         const sdkMsg = msg as Record<string, unknown>;
+        const parentToolUseId = sdkMsg["parent_tool_use_id"];
+        const isTopLevel = parentToolUseId === null || parentToolUseId === undefined;
 
         if (sdkMsg["type"] === "stream_event") {
+          if (!isTopLevel) continue;
           const event = sdkMsg["event"] as Record<string, unknown> | undefined;
           if (!event) continue;
           const eventType = event["type"] as string;
@@ -309,14 +342,24 @@ function claudeCodeCreateStream(
           } else if (eventType === "content_block_delta") {
             const delta = event["delta"] as Record<string, unknown> | undefined;
             if (delta?.["type"] === "text_delta") {
-              queue.push({ type: "text_delta", text: String(delta["text"] ?? "") });
+              const chunk = String(delta["text"] ?? "");
+              if (chunk.length > 0 && chunk !== lastTextDelta) {
+                queue.push({ type: "text_delta", text: chunk });
+              }
+              lastTextDelta = chunk;
             } else if (delta?.["type"] === "thinking_delta") {
-              queue.push({ type: "thinking_delta", thinking: String(delta["thinking"] ?? "") });
+              const chunk = String(delta["thinking"] ?? "");
+              if (chunk.length > 0 && chunk !== lastThinkingDelta) {
+                queue.push({ type: "thinking_delta", thinking: chunk });
+              }
+              lastThinkingDelta = chunk;
             }
           }
         } else if (sdkMsg["type"] === "assistant") {
+          if (!isTopLevel) continue;
           activityWriter.processAssistantMessage(sdkMsg);
         } else if (sdkMsg["type"] === "user") {
+          if (!isTopLevel) continue;
           const innerMsg = sdkMsg["message"] as Record<string, unknown> | undefined;
           const content = innerMsg?.["content"];
           if (Array.isArray(content)) {
@@ -331,6 +374,8 @@ function claudeCodeCreateStream(
             }
           }
         } else if (sdkMsg["type"] === "result") {
+          if (completionEmitted) continue;
+          completionEmitted = true;
           activityWriter.processResultMessage(sdkMsg);
           const usage = sdkMsg["usage"] as Record<string, unknown> | undefined;
           const inputTokens = typeof usage?.["input_tokens"] === "number" ? usage["input_tokens"] : 0;
@@ -370,15 +415,15 @@ function claudeCodeCreateStream(
 // ─── Models ───────────────────────────────────────────────────────────────────
 
 const claudeCodeModels: GsdModel[] = [
-  { id: "claude-code:opus-4-6", displayName: "Opus 4.6 (Claude Code)", reasoning: true, contextWindow: 1000000, maxTokens: 32000 },
-  { id: "claude-code:sonnet-4-6", displayName: "Sonnet 4.6 (Claude Code)", reasoning: true, contextWindow: 200000, maxTokens: 16000 },
-  { id: "claude-code:haiku-4-5", displayName: "Haiku 4.5 (Claude Code)", reasoning: false, contextWindow: 200000, maxTokens: 8096 },
+  { id: "claude-code-reaper:opus-4-6", displayName: "Opus 4.6 (Claude Code)", reasoning: true, contextWindow: 1000000, maxTokens: 32000 },
+  { id: "claude-code-reaper:sonnet-4-6", displayName: "Sonnet 4.6 (Claude Code)", reasoning: true, contextWindow: 200000, maxTokens: 16000 },
+  { id: "claude-code-reaper:haiku-4-5", displayName: "Haiku 4.5 (Claude Code)", reasoning: false, contextWindow: 200000, maxTokens: 8096 },
 ];
 
 // ─── Provider info ────────────────────────────────────────────────────────────
 
 export const claudeCodeProviderInfo: GsdProviderInfo = {
-  id: "claude-code",
+  id: "claude-code-reaper",
   pluginDir: dirname(fileURLToPath(import.meta.url)),
   displayName: "Claude Code (Subscription)",
   authMode: "externalCli",

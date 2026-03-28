@@ -1,5 +1,5 @@
 {
-  "id": "claude-code",
+  "id": "claude-code-reaper",
   "name": "Claude Code Provider",
   "version": "1.0.0",
   "description": "Access Claude models through Claude Code CLI subscription",
@@ -7,9 +7,9 @@
   "requires": { "platform": ">=2.44.0" },
   "provides": {
     "provider": {
-      "id": "claude-code",
+      "id": "claude-code-reaper",
       "authType": "cli",
-      "defaultModel": "claude-code:opus-4-6"
+      "defaultModel": "claude-code-reaper:opus-4-6"
     }
   },
   "dependencies": {
