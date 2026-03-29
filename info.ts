@@ -424,7 +424,7 @@ function claudeCodeCreateStream(
             } else if (delta?.["type"] === "thinking_delta") {
               const chunk = String(delta["thinking"] ?? "");
               if (chunk.length > 0 && chunk !== lastThinkingDelta) {
-                queue.push({ type: "thinking_delta", thinking: chunk });
+                queue.push({ type: "thinking_delta", thinking: chunk.endsWith("\n") ? chunk : `${chunk}\n` });
               }
               lastThinkingDelta = chunk;
             }
