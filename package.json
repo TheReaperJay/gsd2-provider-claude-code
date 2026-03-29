@@ -9,6 +9,6 @@
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.2.79",
-    "@thereaperjay/gsd-provider-api": "^0.5.8"
+    "@thereaperjay/gsd-provider-api": "file:../gsd-provider-api"
   }
 }

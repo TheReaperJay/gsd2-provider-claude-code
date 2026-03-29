@@ -7,7 +7,14 @@
  */
 
 import { registerProviderInfo } from "@thereaperjay/gsd-provider-api";
-import type { GsdProviderInfo, GsdModel, GsdStreamContext, GsdProviderDeps, GsdEvent } from "@thereaperjay/gsd-provider-api";
+import type {
+  GsdProviderInfo,
+  GsdModel,
+  GsdStreamContext,
+  GsdProviderDeps,
+  GsdEvent,
+  GsdToolResultPayload,
+} from "@thereaperjay/gsd-provider-api";
 import { spawnSync } from "node:child_process";
 import { join, dirname } from "node:path";
 import { existsSync } from "node:fs";
@@ -112,6 +119,39 @@ function extractToolDetail(toolName: string, toolInput: unknown): string | undef
     default:
       return undefined;
   }
+}
+
+function safeToolInputJson(toolInput: unknown): string {
+  if (!toolInput || typeof toolInput !== "object") return "{}";
+  try {
+    return JSON.stringify(toolInput);
+  } catch {
+    return "{}";
+  }
+}
+
+function normalizeToolResultPayload(content: unknown, isError: boolean): GsdToolResultPayload {
+  if (typeof content === "string") {
+    return { content: [{ type: "text", text: content }], isError };
+  }
+
+  if (!Array.isArray(content)) {
+    return { content: [], isError };
+  }
+
+  const normalized = content.map((part) => {
+    if (part && typeof part === "object") {
+      const block = part as Record<string, unknown>;
+      const type = typeof block.type === "string" ? block.type : "text";
+      const text = typeof block.text === "string" ? block.text : undefined;
+      const data = typeof block.data === "string" ? block.data : undefined;
+      const mimeType = typeof block.mimeType === "string" ? block.mimeType : undefined;
+      return { ...block, type, text, data, mimeType };
+    }
+    return { type: "text", text: String(part ?? "") };
+  });
+
+  return { content: normalized, isError };
 }
 
 function extractMessageText(content: unknown): string {
@@ -307,7 +347,8 @@ function claudeCodeCreateStream(
             lastActivityAt = Date.now();
             deps.onToolStart(input.tool_use_id);
             const detail = extractToolDetail(input.tool_name, input.tool_input);
-            queue.push({ type: "tool_start", toolCallId: input.tool_use_id, toolName: input.tool_name, detail });
+            queue.push({ type: "tool_call_start", toolCallId: input.tool_use_id, toolName: input.tool_name, detail });
+            queue.push({ type: "tool_call_delta", toolCallId: input.tool_use_id, delta: safeToolInputJson(input.tool_input) });
 
             if (input.tool_name === "Write" || input.tool_name === "Edit") {
               const toolInput = input.tool_input as Record<string, unknown> | null | undefined;
@@ -325,7 +366,7 @@ function claudeCodeCreateStream(
             if (input.hook_event_name !== "PostToolUse") return {};
             lastActivityAt = Date.now();
             deps.onToolEnd(input.tool_use_id);
-            queue.push({ type: "tool_end", toolCallId: input.tool_use_id });
+            queue.push({ type: "tool_call_end", toolCallId: input.tool_use_id });
             return {};
           }],
         }],
@@ -335,7 +376,7 @@ function claudeCodeCreateStream(
             if (input.hook_event_name !== "PostToolUseFailure") return {};
             lastActivityAt = Date.now();
             deps.onToolEnd(input.tool_use_id);
-            queue.push({ type: "tool_end", toolCallId: input.tool_use_id });
+            queue.push({ type: "tool_call_end", toolCallId: input.tool_use_id });
             return {};
           }],
         }],
@@ -439,11 +480,19 @@ function claudeCodeCreateStream(
           if (Array.isArray(content)) {
             for (const block of content as Record<string, unknown>[]) {
               if (block["type"] === "tool_result") {
+                const toolUseId = String(block["tool_use_id"] ?? "");
+                const isError = block["is_error"] === true;
                 activityWriter.processToolResult(
-                  String(block["tool_use_id"] ?? ""),
+                  toolUseId,
                   block["content"] ?? [],
-                  block["is_error"] === true,
+                  isError,
                 );
+                queue.push({
+                  type: "tool_result",
+                  toolCallId: toolUseId,
+                  toolName: typeof block["tool_name"] === "string" ? String(block["tool_name"]) : "Claude Tool",
+                  result: normalizeToolResultPayload(block["content"], isError),
+                });
               }
             }
           }
